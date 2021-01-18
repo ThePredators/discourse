@@ -1,7 +1,6 @@
 import Application from "@ember/application";
 import Mousetrap from "mousetrap";
 import { buildResolver } from "discourse-common/resolver";
-import { getOwner } from "discourse-common/lib/get-owner";
 
 const _pluginCallbacks = [];
 
@@ -27,8 +26,7 @@ const Discourse = Application.extend({
 
     const init = module.default;
     const oldInitialize = init.initialize;
-    init.initialize = (app) =>
-      oldInitialize.call(init, getOwner(app) || app.__container__, app);
+    init.initialize = (app) => oldInitialize.call(init, app.__container__, app);
 
     return init;
   },

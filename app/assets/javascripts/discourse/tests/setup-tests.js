@@ -70,10 +70,6 @@ function createApplication(config, settings) {
   app.__container__ = container;
   setDefaultOwner(container);
 
-  app.rootElement = "#ember-testing";
-  app.setupForTesting();
-  app.injectTestHelpers();
-
   // TODO: remove after fixing
   app.testing = false;
 
@@ -88,7 +84,11 @@ function createApplication(config, settings) {
   return app;
 }
 
-export default function setupTests(config) {
+function setupTestsCommon(application, container, config) {
+  application.rootElement = "#ember-testing";
+  application.setupForTesting();
+  application.injectTestHelpers();
+
   sinon.config = {
     injectIntoThis: false,
     injectInto: null,
@@ -100,20 +100,14 @@ export default function setupTests(config) {
   // Stop the message bus so we don't get ajax calls
   MessageBus.stop();
 
-  if (!setupApplicationTest) {
-    // Legacy testing environment
-    let settings = resetSettings();
-    app = createApplication(config, settings);
-  }
-
-  $.fn.modal = AcceptanceModal;
-
   // disable logster error reporting
   if (window.Logster) {
     window.Logster.enabled = false;
   } else {
     window.Logster = { enabled: false };
   }
+
+  $.fn.modal = AcceptanceModal;
 
   let server;
 
@@ -158,7 +152,7 @@ export default function setupTests(config) {
     bootbox.$body = $("#ember-testing");
     let settings = resetSettings();
 
-    if (setupApplicationTest) {
+    if (config) {
       // Ember CLI testing environment
       app = createApplication(config, settings);
     }
@@ -268,10 +262,22 @@ export default function setupTests(config) {
   // forces 0 as duration for all jquery animations
   jQuery.fx.off = true;
 
-  if (!setupApplicationTest) {
-    // Legacy testing environment
-    setApplication(app);
-    setDefaultOwner(app.__container__);
-    resetSite();
-  }
+  setApplication(application);
+  setDefaultOwner(application.__container__);
+  resetSite();
+}
+
+export function setupTestsLegacy(application) {
+  app = application;
+  setResolver(buildResolver("discourse").create({ namespace: app }));
+  setupTestsCommon(application, app.__container__);
+
+  app.SiteSettings = currentSettings();
+  app.start();
+}
+
+export default function setupTests(config) {
+  let settings = resetSettings();
+  app = createApplication(config, settings);
+  setupTestsCommon(app, app.__container__, config);
 }

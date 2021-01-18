@@ -28,7 +28,6 @@ import { mapRoutes } from "discourse/mapping-router";
 import { resetCustomPostMessageCallbacks } from "discourse/controllers/topic";
 import { resetDecorators } from "discourse/widgets/widget";
 import { resetCache as resetOneboxCache } from "pretty-text/oneboxer";
-import { resetPluginApi } from "discourse/lib/plugin-api";
 import { resetDecorators as resetPluginOutletDecorators } from "discourse/components/plugin-connector";
 import { resetDecorators as resetPostCookedDecorators } from "discourse/widgets/post-cooked";
 import { resetTopicTitleDecorators } from "discourse/components/topic-title";
@@ -209,9 +208,6 @@ export function acceptance(name, optionsOrCallback) {
 
       clearOutletCache();
       clearHTMLCache();
-      if (LEGACY_ENV) {
-        resetPluginApi();
-      }
 
       if (siteChanges) {
         resetSite(currentSettings(), siteChanges);
@@ -248,9 +244,6 @@ export function acceptance(name, optionsOrCallback) {
       resetExtraClasses();
       clearOutletCache();
       clearHTMLCache();
-      if (LEGACY_ENV) {
-        resetPluginApi();
-      }
       clearRewrites();
       initSearchData();
       resetDecorators();
